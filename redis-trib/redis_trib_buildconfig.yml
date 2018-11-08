@@ -1,0 +1,60 @@
+apiVersion: v1
+kind: ImageStream
+metadata:
+  name: redis-trib
+spec:
+  imagePullPolicy: IfNotPresent
+  tags:
+  - annotations: null
+    from:
+      kind: DockerImage
+      name: 'docker.io/ubuntu:latest'
+    name: latest
+    referencePolicy:
+      type: 'Local'
+
+---
+apiVersion: v1
+kind: ImageStream
+metadata:
+  name: redis-mgmt
+spec:
+  imagePullPolicy: IfNotPresent
+  tags:
+  - annotations: null
+    from:
+      kind: DockerImage
+      name: 'docker.io/ubuntu:latest'
+    name: latest
+    referencePolicy:
+      type: 'Local'
+---
+
+apiVersion: v1
+kind: BuildConfig
+metadata:
+  name: "redis-mgmt-build"
+spec:
+  output:
+    to:
+      kind: "ImageStreamTag"
+      name: "redis-mgmt:latest"
+  source:
+    git:
+      uri: http://github.com/project616/redis-cluster-okd.git
+      ref: "master"
+    contextDir: redis-trib
+  images:
+  - from:
+      kind: "ImageStreamTag"
+      name: "redis-mgmt:latest"
+  runPolicy: "Serial"
+  strategy:
+    dockerStrategy:
+      noCache: true
+      from:
+        kind: "ImageStreamTag"
+        name: "redis-mgmt:latest"
+  triggers:
+    #- type: "ImageChange"
+    - type: "ConfigChange"

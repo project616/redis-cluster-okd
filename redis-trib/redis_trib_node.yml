@@ -1,0 +1,36 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    name: redis-trib
+    redis_node: redis-trib
+  generateName: redis-trib-
+spec:
+  containers:
+  - image: 'docker-registry.default.svc:5000/nextcloud-dev/redis-mgmt:latest'
+    command:
+    #- "/tmp/make_cluster.sh"
+    - "/usr/bin/redis-server"
+    name: redis-trib
+    imagePullPolicy: IfNotPresent
+    ports:
+    - containerPort: 6379
+      name: redis-server
+      protocol: TCP
+dnsPolicy: ClusterFirst
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    redis_node: redis-trib
+  name: redis-trib-service
+spec:
+  ports:
+  - name: redis-trib
+    port: 6379
+    protocol: TCP
+    targetPort: 6379
+  selector:
+    redis_node: redis-trib

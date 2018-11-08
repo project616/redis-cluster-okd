@@ -1,0 +1,17 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: cluster-maker
+spec:
+  parallelism: 1
+  completions: 1
+  template:
+    metadata:
+      name: cluster-maker
+    spec:
+      containers:
+      - name: cluster-maker
+        image: 'docker-registry.default.svc:5000/example0/redis-mgmt:latest'
+        command:
+        - "/tmp/make_cluster.sh"
+      restartPolicy: Never
